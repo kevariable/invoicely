@@ -15,7 +15,7 @@ return new class extends Migration
             $table->enum('view_state', ['unread', 'viewed'])->default('unread')->after('status');
             $table->string('public_token', 64)->unique()->nullable()->after('view_state');
             $table->timestamp('viewed_at')->nullable()->after('public_token');
-            
+
             $table->index('view_state');
             $table->index('public_token');
         });

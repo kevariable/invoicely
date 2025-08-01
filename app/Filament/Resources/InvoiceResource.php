@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\InvoiceResource\Actions\Tables\CopyShareLinkAction;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Helpers\CurrencyHelper;
@@ -22,7 +23,7 @@ class InvoiceResource extends Resource
     protected static ?string $model = Invoice::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -35,17 +36,17 @@ class InvoiceResource extends Resource
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->default(fn () => Invoice::generateInvoiceNumber()),
-                        
+
                         Forms\Components\Select::make('customer_id')
                             ->relationship('customer', 'name')
                             ->required()
                             ->searchable()
                             ->preload(),
-                        
+
                         Forms\Components\Select::make('status')
                             ->options([
                                 'draft' => 'Draft',
-                                'sent' => 'Sent', 
+                                'sent' => 'Sent',
                                 'paid' => 'Paid',
                                 'overdue' => 'Overdue',
                                 'cancelled' => 'Cancelled',
@@ -56,7 +57,7 @@ class InvoiceResource extends Resource
                         Forms\Components\DatePicker::make('issue_date')
                             ->required()
                             ->default(now()),
-                        
+
                         Forms\Components\DatePicker::make('due_date')
                             ->required()
                             ->default(now()->addDays(30)),
@@ -77,12 +78,12 @@ class InvoiceResource extends Resource
                             ->prefixIcon('heroicon-o-currency-dollar')
                             ->disabled()
                             ->dehydrated(),
-                        
+
                         Forms\Components\TextInput::make('tax_amount')
                             ->numeric()
                             ->prefixIcon('heroicon-o-currency-dollar')
                             ->default(0),
-                        
+
                         Forms\Components\TextInput::make('total_amount')
                             ->numeric()
                             ->prefixIcon('heroicon-o-currency-dollar')
@@ -103,11 +104,11 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('invoice_number')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('customer.name')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->formatStateUsing(fn (string $state) => str($state)->title())
@@ -118,7 +119,7 @@ class InvoiceResource extends Resource
                         'danger' => 'overdue',
                         'warning' => 'cancelled',
                     ]),
-                
+
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('Total')
                     ->formatStateUsing(function ($record) {
@@ -133,15 +134,15 @@ class InvoiceResource extends Resource
                         'GBP' => 'success',
                         default => 'gray',
                     }),
-                
+
                 Tables\Columns\TextColumn::make('issue_date')
                     ->date()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('due_date')
                     ->date()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('view_state')
                     ->badge()
                     ->label('View Status')
@@ -153,7 +154,7 @@ class InvoiceResource extends Resource
                         'heroicon-o-eye-slash' => 'unread',
                         'heroicon-o-eye' => 'viewed',
                     ]),
-                
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -164,11 +165,11 @@ class InvoiceResource extends Resource
                     ->options([
                         'draft' => 'Draft',
                         'sent' => 'Sent',
-                        'paid' => 'Paid', 
+                        'paid' => 'Paid',
                         'overdue' => 'Overdue',
                         'cancelled' => 'Cancelled',
                     ]),
-                
+
                 Tables\Filters\SelectFilter::make('view_state')
                     ->label('View Status')
                     ->options([
@@ -181,7 +182,7 @@ class InvoiceResource extends Resource
                         'USD' => '$ USD',
                         'GBP' => '£ GBP',
                     ]),
-                
+
                 Tables\Filters\Filter::make('overdue')
                     ->query(fn (Builder $query): Builder => $query->where('due_date', '<', now())->where('status', '!=', 'paid'))
                     ->label('Overdue Invoices'),
@@ -189,29 +190,19 @@ class InvoiceResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('View Invoice'),
-                
+
                 Tables\Actions\Action::make('preview')
                     ->label('Preview')
                     ->icon('heroicon-o-eye')
                     ->color('gray')
                     ->url(fn (Invoice $record) => $record->getPublicUrl())
                     ->openUrlInNewTab(),
-                
-                Tables\Actions\Action::make('share_link')
+
+                CopyShareLinkAction::make('copy_share_link')
+                    ->copyable(fn (Invoice $record) => $record->getPublicUrl())
                     ->label('Copy Share Link')
                     ->icon('heroicon-o-share')
-                    ->color('info')
-                    ->action(function (Invoice $record) {
-                        $url = $record->getPublicUrl();
-                        return redirect()->back()->with('share_url', $url);
-                    })
-                    ->after(function () {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Share link generated!')
-                            ->body('The secure share link is ready to copy.')
-                            ->success()
-                            ->send();
-                    }),
+                    ->color('info'),
 
                 Tables\Actions\Action::make('send_email')
                     ->label('Send Email')
@@ -219,10 +210,10 @@ class InvoiceResource extends Resource
                     ->color('warning')
                     ->requiresConfirmation()
                     ->modalHeading('Send Invoice Email')
-                    ->modalDescription(fn (Invoice $record) => 'Send invoice ' . $record->invoice_number . ' to ' . $record->customer->name . ' (' . $record->customer->email . ')?')
+                    ->modalDescription(fn (Invoice $record) => 'Send invoice '.$record->invoice_number.' to '.$record->customer->name.' ('.$record->customer->email.')?')
                     ->action(function (Invoice $record) {
                         $companySettings = CompanySetting::getSettings();
-                        
+
                         Mail::to($record->customer->email)->send(
                             new InvoiceNotification($record->load(['customer', 'items']), $companySettings)
                         );
@@ -230,29 +221,29 @@ class InvoiceResource extends Resource
                     ->after(function (Invoice $record) {
                         \Filament\Notifications\Notification::make()
                             ->title('Email sent successfully!')
-                            ->body('Invoice has been sent to ' . $record->customer->email)
+                            ->body('Invoice has been sent to '.$record->customer->email)
                             ->success()
                             ->send();
                     })
-                    ->visible(fn (Invoice $record) => !empty($record->customer->email)),
-                    
+                    ->visible(fn (Invoice $record) => ! empty($record->customer->email)),
+
                 Tables\Actions\Action::make('download_pdf')
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('primary')
                     ->action(function (Invoice $record) {
-                        $pdfService = new GenerateInvoiceAction();
+                        $pdfService = new GenerateInvoiceAction;
                         $pdfContent = $pdfService->execute($record);
-                        
-                        $filename = 'invoice-' . $record->invoice_number . '.pdf';
-                        
+
+                        $filename = 'invoice-'.$record->invoice_number.'.pdf';
+
                         return response($pdfContent)
                             ->header('Content-Type', 'application/pdf')
-                            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+                            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
                     }),
-                    
+
                 Tables\Actions\EditAction::make(),
-                
+
                 Tables\Actions\Action::make('mark_paid')
                     ->label('Mark as Paid')
                     ->icon('heroicon-o-check-circle')
@@ -261,7 +252,7 @@ class InvoiceResource extends Resource
                     ->modalHeading('Mark Invoice as Paid')
                     ->modalDescription('Are you sure you want to mark this invoice as paid?')
                     ->action(fn (Invoice $record) => $record->markAsPaid())
-                    ->visible(fn (Invoice $record) => !$record->isPaid())
+                    ->visible(fn (Invoice $record) => ! $record->isPaid())
                     ->after(fn () => \Filament\Notifications\Notification::make()
                         ->title('Invoice marked as paid')
                         ->success()

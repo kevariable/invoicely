@@ -14,14 +14,14 @@ final class DataHydration
     public static function make(string $className, mixed $data): mixed
     {
         try {
-            return (new MapperBuilder())
+            return (new MapperBuilder)
                 ->allowSuperfluousKeys()
                 ->enableFlexibleCasting()
                 ->mapper()
                 ->map($className, Source::array($data));
         } catch (MappingError $error) {
             throw new \InvalidArgumentException(
-                "Failed to hydrate {$className}: " . $error->getMessage(),
+                "Failed to hydrate {$className}: ".$error->getMessage(),
                 previous: $error
             );
         }
@@ -41,17 +41,17 @@ final class DataHydration
     public static function normalize(array $data): array
     {
         $normalized = [];
-        
+
         foreach ($data as $key => $value) {
             $snakeKey = self::toSnakeCase($key);
-            
+
             if (is_array($value)) {
                 $normalized[$snakeKey] = self::normalize($value);
             } else {
                 $normalized[$snakeKey] = $value;
             }
         }
-        
+
         return $normalized;
     }
 

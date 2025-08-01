@@ -3,26 +3,23 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CompanySettingResource\Pages;
-use App\Filament\Resources\CompanySettingResource\RelationManagers;
 use App\Models\CompanySetting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CompanySettingResource extends Resource
 {
     protected static ?string $model = CompanySetting::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
-    
+
     protected static ?string $navigationLabel = 'Company Settings';
-    
+
     protected static ?string $modelLabel = 'Company Settings';
-    
+
     protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form
@@ -35,23 +32,23 @@ class CompanySettingResource extends Resource
                             ->label('Company Name')
                             ->maxLength(255)
                             ->helperText('Optional - leave blank to use only person name'),
-                        
+
                         Forms\Components\TextInput::make('person_name')
                             ->label('Person Name')
                             ->required()
                             ->maxLength(255)
                             ->helperText('This name will appear in email signatures'),
-                        
+
                         Forms\Components\TextInput::make('email')
                             ->label('Email Address')
                             ->email()
                             ->maxLength(255),
-                        
+
                         Forms\Components\TextInput::make('phone')
                             ->label('Phone Number')
                             ->tel()
                             ->maxLength(255),
-                        
+
                         Forms\Components\TextInput::make('website')
                             ->label('Website')
                             ->url()
@@ -126,33 +123,33 @@ class CompanySettingResource extends Resource
                     ->label('Company Name')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('city')
                     ->label('City')
                     ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('country')
                     ->label('Country')
                     ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('currency')
                     ->label('Currency')
                     ->badge(),
-                
+
                 Tables\Columns\TextColumn::make('tax_rate')
                     ->label('Tax Rate')
                     ->suffix('%')
                     ->numeric()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Last Updated')
                     ->dateTime()

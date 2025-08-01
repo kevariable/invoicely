@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\Actions;
+namespace App\Filament\Resources\InvoiceResource\Actions\Tables;
 
 use App\Filament\Actions\Concerns\HasCopyable;
-use Filament\Actions\Action;
+use Filament\Tables\Actions\Action;
 
 final class CopyShareLinkAction extends Action
 {

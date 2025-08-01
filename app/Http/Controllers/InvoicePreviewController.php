@@ -19,7 +19,7 @@ class InvoicePreviewController extends Controller
             ->with(['customer', 'items'])
             ->first();
 
-        if (!$invoice) {
+        if (! $invoice) {
             abort(404, 'Invoice not found or link has expired.');
         }
 
@@ -43,20 +43,20 @@ class InvoicePreviewController extends Controller
             ->with(['customer', 'items'])
             ->first();
 
-        if (!$invoice) {
+        if (! $invoice) {
             abort(404, 'Invoice not found or link has expired.');
         }
 
         // Mark invoice as viewed if it's currently unread
         $invoice->markAsViewed();
 
-        $pdfService = new GenerateInvoiceAction();
+        $pdfService = new GenerateInvoiceAction;
         $pdfContent = $pdfService->execute($invoice);
 
-        $filename = 'invoice-' . $invoice->invoice_number . '.pdf';
+        $filename = 'invoice-'.$invoice->invoice_number.'.pdf';
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 }

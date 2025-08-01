@@ -9,8 +9,8 @@ final class Email extends ValueObject
     public function __construct(
         public readonly ?string $value,
     ) {
-        if ($value !== null && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException('Invalid email format: ' . $value);
+        if ($value !== null && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Invalid email format: '.$value);
         }
     }
 

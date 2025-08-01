@@ -7,8 +7,6 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -23,7 +21,7 @@ class ItemsRelationManager extends RelationManager
                     ->maxLength(65535)
                     ->placeholder('Describe the service or product...')
                     ->columnSpanFull(),
-                
+
                 Forms\Components\TextInput::make('quantity')
                     ->label('Quantity')
                     ->required()
@@ -38,7 +36,7 @@ class ItemsRelationManager extends RelationManager
                             $set('total_amount', round($state * $rate, 2));
                         }
                     }),
-                
+
                 Forms\Components\TextInput::make('unit_rate')
                     ->label('Unit Rate')
                     ->required()
@@ -54,7 +52,7 @@ class ItemsRelationManager extends RelationManager
                             $set('total_amount', round($state * $quantity, 2));
                         }
                     }),
-                
+
                 Forms\Components\TextInput::make('total_amount')
                     ->label('Total Amount')
                     ->required()
@@ -75,28 +73,30 @@ class ItemsRelationManager extends RelationManager
                     ->limit(50)
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('quantity')
                     ->label('Quantity')
                     ->numeric(decimalPlaces: 2)
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('unit_rate')
                     ->label('Unit Rate')
                     ->formatStateUsing(function ($record) {
                         $currency = $record->invoice->currency ?? 'USD';
+
                         return \App\Helpers\CurrencyHelper::format($record->unit_rate, $currency);
                     })
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('Total')
                     ->formatStateUsing(function ($record) {
                         $currency = $record->invoice->currency ?? 'USD';
+
                         return \App\Helpers\CurrencyHelper::format($record->total_amount, $currency);
                     })
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

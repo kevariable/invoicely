@@ -12,9 +12,9 @@ final readonly class GenerateInvoiceAction
     public function execute(Invoice $invoice): string
     {
         $companySettings = CompanySetting::getSettings();
-        
+
         $invoice->load(['customer', 'items']);
-        
+
         $html = View::make('invoice-pdf-tailwind', [
             'invoice' => $invoice,
             'companySettings' => $companySettings,
@@ -31,4 +31,4 @@ final readonly class GenerateInvoiceAction
             ->showBackground()
             ->pdf();
     }
-} 
+}

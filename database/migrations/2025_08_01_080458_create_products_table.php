@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('sku')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            
+
             $table->index('sku');
             $table->index('is_active');
         });

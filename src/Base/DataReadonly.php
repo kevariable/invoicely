@@ -19,15 +19,15 @@ abstract readonly class DataReadonly
     {
         $reflection = new \ReflectionClass($this);
         $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
-        
+
         $result = [];
-        
+
         foreach ($properties as $property) {
             $value = $property->getValue($this);
-            
+
             // Convert property name to snake_case
             $key = $this->toSnakeCase($property->getName());
-            
+
             if ($value instanceof DataReadonly) {
                 $result[$key] = $value->toArray();
             } elseif ($value instanceof ValueObject) {
@@ -38,7 +38,7 @@ abstract readonly class DataReadonly
                 $result[$key] = $value;
             }
         }
-        
+
         return $result;
     }
 
@@ -56,10 +56,10 @@ abstract readonly class DataReadonly
     private function convertArrayToSnakeCase(array $array): array
     {
         $result = [];
-        
+
         foreach ($array as $key => $value) {
             $snakeKey = is_string($key) ? $this->toSnakeCase($key) : $key;
-            
+
             if ($value instanceof DataReadonly) {
                 $result[$snakeKey] = $value->toArray();
             } elseif ($value instanceof ValueObject) {
@@ -70,7 +70,7 @@ abstract readonly class DataReadonly
                 $result[$snakeKey] = $value;
             }
         }
-        
+
         return $result;
     }
 }

@@ -52,6 +52,6 @@ class InvoiceItem extends Model
      */
     public function getFormattedRateAttribute(): string
     {
-        return '$' . number_format($this->unit_rate, 2);
+        return '$'.number_format($this->unit_rate, 2);
     }
 }

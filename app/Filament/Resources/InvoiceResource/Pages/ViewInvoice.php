@@ -27,7 +27,7 @@ class ViewInvoice extends ViewRecord
                 ->color('gray')
                 ->url(fn () => $this->record->getPublicUrl())
                 ->openUrlInNewTab(),
-            
+
             InvoiceResource\Actions\CopyShareLinkAction::make('copy_share_link')
                 ->copyable(fn () => $this->record->getPublicUrl())
                 ->label('Copy Share Link')
@@ -40,10 +40,10 @@ class ViewInvoice extends ViewRecord
                 ->color('warning')
                 ->requiresConfirmation()
                 ->modalHeading('Send Invoice Email')
-                ->modalDescription(fn () => 'Send invoice ' . $this->record->invoice_number . ' to ' . $this->record->customer->name . ' (' . $this->record->customer->email . ')?')
+                ->modalDescription(fn () => 'Send invoice '.$this->record->invoice_number.' to '.$this->record->customer->name.' ('.$this->record->customer->email.')?')
                 ->action(function () {
                     $companySettings = CompanySetting::getSettings();
-                    
+
                     Mail::to($this->record->customer->email)->send(
                         new InvoiceNotification($this->record->load(['customer', 'items']), $companySettings)
                     );
@@ -51,27 +51,27 @@ class ViewInvoice extends ViewRecord
                 ->after(function () {
                     Notification::make()
                         ->title('Email sent successfully!')
-                        ->body('Invoice has been sent to ' . $this->record->customer->email)
+                        ->body('Invoice has been sent to '.$this->record->customer->email)
                         ->success()
                         ->send();
                 })
-                ->visible(fn () => !empty($this->record->customer->email)),
-            
+                ->visible(fn () => ! empty($this->record->customer->email)),
+
             Actions\Action::make('download_pdf')
                 ->label('Download PDF')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('primary')
                 ->action(function () {
-                    $pdfService = new GenerateInvoiceAction();
+                    $pdfService = new GenerateInvoiceAction;
                     $pdfContent = $pdfService->execute($this->record);
-                    
-                    $filename = 'invoice-' . $this->record->invoice_number . '.pdf';
-                    
+
+                    $filename = 'invoice-'.$this->record->invoice_number.'.pdf';
+
                     return response($pdfContent)
                         ->header('Content-Type', 'application/pdf')
-                        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+                        ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
                 }),
-                
+
             Actions\Action::make('mark_paid')
                 ->label('Mark as Paid')
                 ->icon('heroicon-o-check-circle')
@@ -83,12 +83,12 @@ class ViewInvoice extends ViewRecord
                     $this->record->markAsPaid();
                     $this->refreshFormData(['status', 'paid_date']);
                 })
-                ->visible(fn () => !$this->record->isPaid())
+                ->visible(fn () => ! $this->record->isPaid())
                 ->after(fn () => Notification::make()
                     ->title('Invoice marked as paid')
                     ->success()
                     ->send()),
-                    
+
             Actions\EditAction::make(),
         ];
     }

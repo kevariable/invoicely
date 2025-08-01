@@ -94,12 +94,13 @@ class Invoice extends Model
     {
         $lastInvoice = static::orderBy('id', 'desc')->first();
         $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
-        
-        return 'INV-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+        return 'INV-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 
     /**
      * Generate a secure public token for sharing.
+     *
      * @throws \Random\RandomException
      */
     public function generatePublicToken(): string
@@ -109,12 +110,13 @@ class Invoice extends Model
         } while (self::where('public_token', $token)->exists());
 
         $this->update(['public_token' => $token]);
-        
+
         return $token;
     }
 
     /**
      * Get the public URL for this invoice.
+     *
      * @throws \Random\RandomException
      */
     public function getPublicUrl(): string
@@ -122,7 +124,7 @@ class Invoice extends Model
         if (! $this->public_token) {
             $this->generatePublicToken();
         }
-        
+
         return url("/invoice/preview/{$this->public_token}");
     }
 

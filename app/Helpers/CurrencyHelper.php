@@ -42,8 +42,9 @@ class CurrencyHelper
     {
         $options = [];
         foreach (self::CURRENCIES as $code => $data) {
-            $options[$code] = $data['symbol'] . ' ' . $data['name'] . ' (' . $code . ')';
+            $options[$code] = $data['symbol'].' '.$data['name'].' ('.$code.')';
         }
+
         return $options;
     }
 
@@ -56,9 +57,9 @@ class CurrencyHelper
         $formattedAmount = number_format($amount, $decimals);
 
         if ($currency['position'] === 'before') {
-            return $currency['symbol'] . $formattedAmount;
+            return $currency['symbol'].$formattedAmount;
         } else {
-            return $formattedAmount . $currency['symbol'];
+            return $formattedAmount.$currency['symbol'];
         }
     }
 
@@ -69,6 +70,7 @@ class CurrencyHelper
     {
         try {
             $companySettings = \App\Models\CompanySetting::getSettings();
+
             return $companySettings->currency ?? 'USD';
         } catch (\Exception $e) {
             return 'USD';

@@ -31,7 +31,7 @@ final class UnitRate extends ValueObject
 
     public function formatted(string $currency = 'USD'): string
     {
-        return number_format($this->value, 2) . ' ' . $currency;
+        return number_format($this->value, 2).' '.$currency;
     }
 
     /**
@@ -39,7 +39,8 @@ final class UnitRate extends ValueObject
      */
     public function formattedWithUnit(string $unit = '', string $currency = 'USD'): string
     {
-        $formatted = number_format($this->value, 2) . ' ' . $currency;
-        return $unit ? $formatted . '/' . $unit : $formatted;
+        $formatted = number_format($this->value, 2).' '.$currency;
+
+        return $unit ? $formatted.'/'.$unit : $formatted;
     }
 }

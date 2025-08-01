@@ -24,13 +24,13 @@ final class DateTime extends ValueObject
         try {
             return new self(new \DateTimeImmutable($dateString));
         } catch (\Exception $e) {
-            throw new \InvalidArgumentException('Invalid date format: ' . $dateString, previous: $e);
+            throw new \InvalidArgumentException('Invalid date format: '.$dateString, previous: $e);
         }
     }
 
     public static function now(): self
     {
-        return new self(new \DateTimeImmutable());
+        return new self(new \DateTimeImmutable);
     }
 
     public function toValue(): ?\DateTimeImmutable

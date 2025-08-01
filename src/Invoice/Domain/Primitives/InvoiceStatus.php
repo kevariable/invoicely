@@ -7,9 +7,13 @@ use Invoice\Base\ValueObject;
 final class InvoiceStatus extends ValueObject
 {
     public const DRAFT = 'draft';
+
     public const SENT = 'sent';
+
     public const PAID = 'paid';
+
     public const OVERDUE = 'overdue';
+
     public const CANCELLED = 'cancelled';
 
     private const VALID_STATUSES = [
@@ -23,9 +27,9 @@ final class InvoiceStatus extends ValueObject
     public function __construct(
         public readonly string $value,
     ) {
-        if (!in_array($value, self::VALID_STATUSES, true)) {
+        if (! in_array($value, self::VALID_STATUSES, true)) {
             throw new \InvalidArgumentException(
-                'Invalid invoice status: ' . $value . '. Valid statuses are: ' . implode(', ', self::VALID_STATUSES)
+                'Invalid invoice status: '.$value.'. Valid statuses are: '.implode(', ', self::VALID_STATUSES)
             );
         }
     }

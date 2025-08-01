@@ -41,6 +41,6 @@ final class Amount extends ValueObject
 
     public function formatted(string $currency = 'USD'): string
     {
-        return number_format($this->value, 2) . ' ' . $currency;
+        return number_format($this->value, 2).' '.$currency;
     }
 }

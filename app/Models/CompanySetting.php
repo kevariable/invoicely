@@ -50,7 +50,7 @@ class CompanySetting extends Model
     {
         $parts = array_filter([
             $this->address,
-            $this->city . ($this->city && $this->state ? ', ' : '') . $this->state . ' ' . $this->zip_code,
+            $this->city.($this->city && $this->state ? ', ' : '').$this->state.' '.$this->zip_code,
             $this->country,
         ]);
 
@@ -62,6 +62,6 @@ class CompanySetting extends Model
      */
     public function getFormattedTaxRateAttribute(): string
     {
-        return number_format($this->tax_rate, 2) . '%';
+        return number_format($this->tax_rate, 2).'%';
     }
 }

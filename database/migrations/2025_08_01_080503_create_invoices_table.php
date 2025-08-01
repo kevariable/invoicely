@@ -24,7 +24,7 @@ return new class extends Migration
             $table->datetime('paid_date')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index('invoice_number');
             $table->index('customer_id');
             $table->index('status');

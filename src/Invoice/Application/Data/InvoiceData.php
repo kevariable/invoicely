@@ -42,6 +42,7 @@ final readonly class InvoiceData extends DataReadonly
         }
 
         $now = DateTime::now();
+
         return $this->dueDate->isBefore($now);
     }
 

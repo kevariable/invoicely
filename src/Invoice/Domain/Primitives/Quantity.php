@@ -50,7 +50,8 @@ final class Quantity extends ValueObject
     public function formattedWithUnit(string $unit = ''): string
     {
         $formatted = $this->formatted();
-        return $unit ? $formatted . ' ' . $unit : $formatted;
+
+        return $unit ? $formatted.' '.$unit : $formatted;
     }
 
     /**

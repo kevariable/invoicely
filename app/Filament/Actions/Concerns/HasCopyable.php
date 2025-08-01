@@ -8,7 +8,7 @@ use Illuminate\Support\Js;
 
 trait HasCopyable
 {
-    protected Closure | string | null $copyable = null;
+    protected Closure|string|null $copyable = null;
 
     public static function getDefaultName(): ?string
     {
@@ -27,18 +27,19 @@ trait HasCopyable
                 'x-data' => '',
                 'x-on:click' => new HtmlString(
                     'window.navigator.clipboard.writeText('.$this->getCopyable().');'
-                    . (($title = $this->getSuccessNotificationTitle()) ? ' $tooltip('.Js::from($title).');' : '')
+                    .(($title = $this->getSuccessNotificationTitle()) ? ' $tooltip('.Js::from($title).');' : '')
                 ),
             ]);
     }
 
-    public function action(Closure | string | null $action): static
+    public function action(Closure|string|null $action): static
     {
         $this->dispatch(null);
+
         return parent::action($action);
     }
 
-    public function copyable(Closure | string | null $copyable): self
+    public function copyable(Closure|string|null $copyable): self
     {
         $this->copyable = $copyable;
 

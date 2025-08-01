@@ -2,10 +2,9 @@
 
 namespace App\Mail;
 
-use App\Models\Invoice;
 use App\Models\CompanySetting;
+use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -23,7 +22,7 @@ class InvoiceNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Invoice: ' . $this->invoice->invoice_number,
+            subject: 'New Invoice: '.$this->invoice->invoice_number,
         );
     }
 
