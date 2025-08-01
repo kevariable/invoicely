@@ -28,8 +28,15 @@ class CustomerResource extends Resource
                 Forms\Components\Section::make('Customer Information')
                     ->schema([
                         Forms\Components\TextInput::make('name')
+                            ->label('Organization Name')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->helperText('Company or organization name'),
+                        
+                        Forms\Components\TextInput::make('person_name')
+                            ->label('Contact Person Name')
+                            ->maxLength(255)
+                            ->helperText('Individual contact person (optional)'),
                         
                         Forms\Components\TextInput::make('email')
                             ->email()
@@ -66,6 +73,12 @@ class CustomerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Organization')
+                    ->searchable()
+                    ->sortable(),
+                
+                Tables\Columns\TextColumn::make('person_name')
+                    ->label('Contact Person')
                     ->searchable()
                     ->sortable(),
                 

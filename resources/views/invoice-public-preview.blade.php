@@ -107,21 +107,16 @@
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Bill To</h3>
                         <div class="text-gray-900">
-                            <div class="font-semibold text-lg">{{ $invoice->customer->name }}</div>
-                            @if($invoice->customer->email)
-                                <div class="text-sm text-gray-600 mt-1">{{ $invoice->customer->email }}</div>
-                            @endif
-                            @if($invoice->customer->address)
-                                <div class="mt-2 text-sm text-gray-600 space-y-1">
-                                    <div>{{ $invoice->customer->address }}</div>
-                                    <div>
-                                        {{ $invoice->customer->city }}@if($invoice->customer->city && $invoice->customer->state), @endif{{ $invoice->customer->state }} {{ $invoice->customer->zip_code }}
-                                    </div>
-                                    @if($invoice->customer->country)
-                                        <div>{{ $invoice->customer->country }}</div>
-                                    @endif
+                            <div class="mt-2 text-sm text-gray-600 space-y-1">
+                                <div>{{ $invoice->customer->name }}</div>
+                                <div>{{ $invoice->customer->address }}</div>
+                                <div>
+                                    {{ $invoice->customer->city }}@if($invoice->customer->city && $invoice->customer->state), @endif{{ $invoice->customer->state }} {{ $invoice->customer->zip_code }}
                                 </div>
-                            @endif
+                                @if($invoice->customer->country)
+                                    <div>{{ $invoice->customer->country }}</div>
+                                @endif
+                            </div>
                             @if($invoice->customer->phone)
                                 <div class="mt-2 text-sm text-gray-600">{{ $invoice->customer->phone }}</div>
                             @endif

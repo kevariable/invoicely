@@ -4,18 +4,18 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
-use App\Models\Invoice;
-use App\Models\Customer;
-use App\Models\CompanySetting;
 use App\Helpers\CurrencyHelper;
+use App\Mail\InvoiceNotification;
+use App\Models\CompanySetting;
+use App\Models\Invoice;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Support\Enums\ActionSize;
+use Illuminate\Support\Facades\Mail;
+use Invoice\Invoice\Domain\Actions\GenerateInvoiceAction;
 
 class InvoiceResource extends Resource
 {
@@ -212,26 +212,43 @@ class InvoiceResource extends Resource
                             ->success()
                             ->send();
                     }),
+
+                Tables\Actions\Action::make('send_email')
+                    ->label('Send Email')
+                    ->icon('heroicon-o-envelope')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Send Invoice Email')
+                    ->modalDescription(fn (Invoice $record) => 'Send invoice ' . $record->invoice_number . ' to ' . $record->customer->name . ' (' . $record->customer->email . ')?')
+                    ->action(function (Invoice $record) {
+                        $companySettings = CompanySetting::getSettings();
+                        
+                        Mail::to($record->customer->email)->send(
+                            new InvoiceNotification($record->load(['customer', 'items']), $companySettings)
+                        );
+                    })
+                    ->after(function (Invoice $record) {
+                        \Filament\Notifications\Notification::make()
+                            ->title('Email sent successfully!')
+                            ->body('Invoice has been sent to ' . $record->customer->email)
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn (Invoice $record) => !empty($record->customer->email)),
                     
                 Tables\Actions\Action::make('download_pdf')
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('primary')
                     ->action(function (Invoice $record) {
-                        $companySettings = CompanySetting::getSettings();
-                        
-                        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoice-pdf', [
-                            'invoice' => $record->load(['customer', 'items']),
-                            'companySettings' => $companySettings
-                        ]);
+                        $pdfService = new GenerateInvoiceAction();
+                        $pdfContent = $pdfService->execute($record);
                         
                         $filename = 'invoice-' . $record->invoice_number . '.pdf';
                         
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->output();
-                        }, $filename, [
-                            'Content-Type' => 'application/pdf',
-                        ]);
+                        return response($pdfContent)
+                            ->header('Content-Type', 'application/pdf')
+                            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
                     }),
                     
                 Tables\Actions\EditAction::make(),

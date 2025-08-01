@@ -100,6 +100,7 @@ class Invoice extends Model
 
     /**
      * Generate a secure public token for sharing.
+     * @throws \Random\RandomException
      */
     public function generatePublicToken(): string
     {
@@ -114,10 +115,11 @@ class Invoice extends Model
 
     /**
      * Get the public URL for this invoice.
+     * @throws \Random\RandomException
      */
     public function getPublicUrl(): string
     {
-        if (!$this->public_token) {
+        if (! $this->public_token) {
             $this->generatePublicToken();
         }
         

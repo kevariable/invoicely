@@ -8,6 +8,7 @@ class CompanySetting extends Model
 {
     protected $fillable = [
         'company_name',
+        'person_name',
         'address',
         'city',
         'state',
@@ -35,6 +36,7 @@ class CompanySetting extends Model
     {
         return static::firstOrCreate([], [
             'company_name' => 'Your Company Name',
+            'person_name' => 'Kevin Abrar Khansa',
             'country' => 'United States',
             'currency' => 'USD',
             'tax_rate' => 0,

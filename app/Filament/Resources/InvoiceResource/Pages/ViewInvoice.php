@@ -3,11 +3,17 @@
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
+use App\Mail\InvoiceNotification;
 use App\Models\CompanySetting;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Facades\Mail;
+use Invoice\Invoice\Domain\Actions\GenerateInvoiceAction;
 
+/**
+ * @property \App\Models\Invoice $record
+ */
 class ViewInvoice extends ViewRecord
 {
     protected static string $resource = InvoiceResource::class;
@@ -22,42 +28,48 @@ class ViewInvoice extends ViewRecord
                 ->url(fn () => $this->record->getPublicUrl())
                 ->openUrlInNewTab(),
             
-            Actions\Action::make('copy_share_link')
+            InvoiceResource\Actions\CopyShareLinkAction::make('copy_share_link')
+                ->copyable(fn () => $this->record->getPublicUrl())
                 ->label('Copy Share Link')
                 ->icon('heroicon-o-share')
-                ->color('info')
+                ->color('info'),
+
+            Actions\Action::make('send_email')
+                ->label('Send Email')
+                ->icon('heroicon-o-envelope')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Send Invoice Email')
+                ->modalDescription(fn () => 'Send invoice ' . $this->record->invoice_number . ' to ' . $this->record->customer->name . ' (' . $this->record->customer->email . ')?')
                 ->action(function () {
-                    $url = $this->record->getPublicUrl();
-                    session()->flash('share_url', $url);
+                    $companySettings = CompanySetting::getSettings();
+                    
+                    Mail::to($this->record->customer->email)->send(
+                        new InvoiceNotification($this->record->load(['customer', 'items']), $companySettings)
+                    );
                 })
                 ->after(function () {
                     Notification::make()
-                        ->title('Share link generated!')
-                        ->body('Share URL: ' . $this->record->getPublicUrl())
+                        ->title('Email sent successfully!')
+                        ->body('Invoice has been sent to ' . $this->record->customer->email)
                         ->success()
-                        ->persistent()
                         ->send();
-                }),
+                })
+                ->visible(fn () => !empty($this->record->customer->email)),
             
             Actions\Action::make('download_pdf')
                 ->label('Download PDF')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('primary')
                 ->action(function () {
-                    $companySettings = CompanySetting::getSettings();
-                    
-                    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoice-pdf', [
-                        'invoice' => $this->record->load(['customer', 'items']),
-                        'companySettings' => $companySettings
-                    ]);
+                    $pdfService = new GenerateInvoiceAction();
+                    $pdfContent = $pdfService->execute($this->record);
                     
                     $filename = 'invoice-' . $this->record->invoice_number . '.pdf';
                     
-                    return response()->streamDownload(function () use ($pdf) {
-                        echo $pdf->output();
-                    }, $filename, [
-                        'Content-Type' => 'application/pdf',
-                    ]);
+                    return response($pdfContent)
+                        ->header('Content-Type', 'application/pdf')
+                        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
                 }),
                 
             Actions\Action::make('mark_paid')

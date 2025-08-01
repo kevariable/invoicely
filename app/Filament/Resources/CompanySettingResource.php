@@ -33,8 +33,14 @@ class CompanySettingResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('company_name')
                             ->label('Company Name')
+                            ->maxLength(255)
+                            ->helperText('Optional - leave blank to use only person name'),
+                        
+                        Forms\Components\TextInput::make('person_name')
+                            ->label('Person Name')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->helperText('This name will appear in email signatures'),
                         
                         Forms\Components\TextInput::make('email')
                             ->label('Email Address')

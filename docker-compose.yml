@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    restart: always
+    entrypoint: /entrypoint.sh
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - "8989:8000"
+    volumes:
+      - ./:/var/www/html:delegated
+      - ./docker/php/entrypoint.dev.sh:/entrypoint.sh
+volumes:
+  sail-mysql:
+    driver: local
+  sail-redis:
+    driver: local

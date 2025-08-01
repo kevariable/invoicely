@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
 use App\Models\CompanySetting;
-use Illuminate\Http\Request;
+use App\Models\Invoice;
 use Illuminate\View\View;
+use Invoice\Invoice\Domain\Actions\GenerateInvoiceAction;
 use Symfony\Component\HttpFoundation\Response;
 
 class InvoicePreviewController extends Controller
@@ -50,15 +50,13 @@ class InvoicePreviewController extends Controller
         // Mark invoice as viewed if it's currently unread
         $invoice->markAsViewed();
 
-        $companySettings = CompanySetting::getSettings();
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoice-pdf', [
-            'invoice' => $invoice,
-            'companySettings' => $companySettings
-        ]);
+        $pdfService = new GenerateInvoiceAction();
+        $pdfContent = $pdfService->execute($invoice);
 
         $filename = 'invoice-' . $invoice->invoice_number . '.pdf';
 
-        return $pdf->download($filename);
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }
