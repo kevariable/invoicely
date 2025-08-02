@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'can_access_panel' => env('APP_CAN_ACCESS_PANEL', ''),
 ];
