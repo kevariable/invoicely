@@ -26,7 +26,7 @@ final readonly class GenerateInvoiceAction
              ->fullPage()
 //             ->setNodeBinary('/usr/bin/node')
 //             ->setNpmBinary('/usr/bin/npm')
-//             ->setChromePath('/usr/bin/chromium-headless-shell')
+             ->setChromePath('/var/www/html/chrome-headless-shell/linux_arm-138.0.7204.183/chrome-headless-shell-linux64/chrome-headless-shell')
              ->noSandbox()
              ->format('A4')
              ->margins(15, 15, 15, 15)
