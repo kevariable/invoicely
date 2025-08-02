@@ -18,13 +18,15 @@ RUN apt-get update \
      && apt-get install -y htop tree nano procps supervisor wget gpg cron \
         zlib1g-dev libpng-dev libjpeg-dev libzip-dev zip libonig-dev libmagickwand-dev\
         libfreetype6-dev libfontconfig1-dev libicu-dev \
+        libpq-dev postgresql-client \
      && docker-php-ext-configure gd --with-jpeg \
      && install-php-extensions zip \
      && docker-php-ext-configure pcntl --enable-pcntl \
         && install-php-extensions pcntl \
      && docker-php-ext-configure intl \
      && install-php-extensions intl \
-     && install-php-extensions pdo gd mbstring \
+     && docker-php-ext-configure pdo_pgsql \
+     && install-php-extensions pdo pdo_pgsql gd mbstring \
      && apt-get clean
 
 # composer
