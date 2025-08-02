@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('invoice_id');
-            $table->index('product_id');
         });
     }
 
