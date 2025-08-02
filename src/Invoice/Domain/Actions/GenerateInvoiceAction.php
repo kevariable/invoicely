@@ -24,8 +24,8 @@ final readonly class GenerateInvoiceAction
         // Commented out Spatie Browsershot implementation
          return Browsershot::html($html)
              ->fullPage()
-             ->setNodeBinary('/usr/bin/node')
-             ->setNpmBinary('/usr/bin/npm')
+//             ->setNodeBinary('/usr/bin/node')
+//             ->setNpmBinary('/usr/bin/npm')
 //             ->setChromePath('/usr/bin/chromium-headless-shell')
              ->noSandbox()
              ->format('A4')
