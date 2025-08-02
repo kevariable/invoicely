@@ -12,11 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoice_items', function (Blueprint $table) {
-            // Drop product-related columns
-            $table->dropForeign(['product_id']);
-            $table->dropIndex(['product_id']);
-            $table->dropColumn('product_id');
-
             // Remove quantity and unit_price columns
             $table->dropColumn(['quantity', 'unit_price']);
 
