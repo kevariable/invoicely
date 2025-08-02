@@ -19,10 +19,10 @@
         }
 
         body {
-            font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
             line-height: 1.5;
             color: #111827;
-            background-color: #f9fafb; /* Match preview background */
+            background-color: white; /* Match preview background */
             font-size: 14px; /* Increased base font size */
         }
 
@@ -257,20 +257,26 @@
             width: 256px; /* Increased from 200px */
         }
 
+        /* CSS2 compatible total rows using table layout */
         .total-row {
             width: 100%;
             margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
         }
 
         .total-row:last-child {
             margin-bottom: 0;
         }
 
+        .total-row-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
         .total-label {
             font-size: 14px; /* Increased from 12px */
             color: #6b7280;
+            text-align: left;
+            width: 50%;
         }
 
         .total-value {
@@ -278,12 +284,17 @@
             color: #111827;
             font-weight: 500;
             text-align: right;
+            width: 50%;
         }
 
         .total-row.grand-total {
             border-top: 1px solid #e5e7eb;
             padding-top: 12px;
             margin-top: 12px;
+        }
+
+        .total-row.grand-total .total-label,
+        .total-row.grand-total .total-value {
             font-size: 18px; /* Increased from 14px */
             font-weight: 700;
         }
@@ -391,156 +402,172 @@
     </style>
 </head>
 <body>
-    <div class="page">
-            <!-- Header -->
-            <div class="header">
-                <table class="header-table">
-                    <tr>
-                        <td class="header-left">
-                            <h1>INVOICE</h1>
-                        </td>
-                        <td class="header-right">
-                            <div class="invoice-number">{{ $invoice->invoice_number }}</div>
-                            <div class="invoice-dates">
-                                <div>Issue Date: {{ $invoice->issue_date->format('M j, Y') }}</div>
-                                <div>Due Date: {{ $invoice->due_date->format('M j, Y') }}</div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+<div class="page">
+    <!-- Header -->
+    <div class="header">
+        <table class="header-table">
+            <tr>
+                <td class="header-left">
+                    <h1>INVOICE</h1>
+                </td>
+                <td class="header-right">
+                    <div class="invoice-number">{{ $invoice->invoice_number }}</div>
+                    <div class="invoice-dates">
+                        <div>Issue Date: {{ $invoice->issue_date->format('M j, Y') }}</div>
+                        <div>Due Date: {{ $invoice->due_date->format('M j, Y') }}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
-            <!-- From/To Section -->
-            <div class="address-section">
-                <table class="address-table">
-                    <tr>
-                        <td>
-                            <div class="section-title">From</div>
-                            <div class="address-content">
-                                <div class="address-details">
-                                    <div>{{ $companySettings->person_name }}</div>
-                                    <div>{{ $companySettings->address }}</div>
-                                    <div>
-                                        {{ $companySettings->city }}@if($companySettings->city && $companySettings->state), @endif{{ $companySettings->state }} {{ $companySettings->zip_code }}
-                                    </div>
-                                    @if($companySettings->country)
-                                        <div>{{ $companySettings->country }}</div>
-                                    @endif
-                                </div>
-                                @if($companySettings->phone || $companySettings->email)
-                                    <div class="contact-info">
-                                        @if($companySettings->phone)
-                                            <div>{{ $companySettings->phone }}</div>
-                                        @endif
-                                        @if($companySettings->email)
-                                            <div>{{ $companySettings->email }}</div>
-                                        @endif
-                                    </div>
+    <!-- From/To Section -->
+    <div class="address-section">
+        <table class="address-table">
+            <tr>
+                <td>
+                    <div class="section-title">From</div>
+                    <div class="address-content">
+                        <div class="address-details">
+                            <div>{{ $companySettings->person_name }}</div>
+                            <div>{{ $companySettings->address }}</div>
+                            <div>
+                                {{ $companySettings->city }}@if($companySettings->city && $companySettings->state), @endif{{ $companySettings->state }} {{ $companySettings->zip_code }}
+                            </div>
+                            @if($companySettings->country)
+                                <div>{{ $companySettings->country }}</div>
+                            @endif
+                        </div>
+                        @if($companySettings->phone || $companySettings->email)
+                            <div class="contact-info">
+                                @if($companySettings->phone)
+                                    <div>{{ $companySettings->phone }}</div>
+                                @endif
+                                @if($companySettings->email)
+                                    <div>{{ $companySettings->email }}</div>
                                 @endif
                             </div>
-                        </td>
-                        <td>
-                            <div class="section-title">Bill To</div>
-                            <div class="address-content">
-                                <div class="address-details">
-                                    <div>{{ $invoice->customer->name }}</div>
-                                    <div>{{ $invoice->customer->address }}</div>
-                                    <div>
-                                        {{ $invoice->customer->city }}@if($invoice->customer->city && $invoice->customer->state), @endif{{ $invoice->customer->state }} {{ $invoice->customer->zip_code }}
-                                    </div>
-                                    @if($invoice->customer->country)
-                                        <div>{{ $invoice->customer->country }}</div>
-                                    @endif
-                                </div>
-                                @if($invoice->customer->phone)
-                                    <div class="contact-info">
-                                        <div>{{ $invoice->customer->phone }}</div>
-                                    </div>
-                                @endif
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="section-title">Bill To</div>
+                    <div class="address-content">
+                        <div class="address-details">
+                            <div>{{ $invoice->customer->name }}</div>
+                            <div>{{ $invoice->customer->address }}</div>
+                            <div>
+                                {{ $invoice->customer->city }}@if($invoice->customer->city && $invoice->customer->state), @endif{{ $invoice->customer->state }} {{ $invoice->customer->zip_code }}
                             </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- Items Table -->
-            <div class="items-container">
-                <table class="items-table">
-                    <thead>
-                        <tr>
-                            <th>Description</th>
-                            <th class="text-right">Quantity</th>
-                            <th class="text-right">Rate</th>
-                            <th class="text-right">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($invoice->items as $item)
-                            <tr>
-                                <td>{{ $item->description }}</td>
-                                <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
-                                <td class="text-right">{{ \App\Helpers\CurrencyHelper::format($item->unit_rate, $invoice->currency) }}</td>
-                                <td class="text-right font-medium">{{ \App\Helpers\CurrencyHelper::format($item->total_amount, $invoice->currency) }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Totals -->
-            <div class="totals-section">
-                <table class="totals-table">
-                    <tr>
-                        <td class="totals-spacer"></td>
-                        <td class="totals-content">
-                            <div class="totals-box">
-                                <div class="total-row">
-                                    <span class="total-label">Subtotal:</span>
-                                    <span class="total-value">{{ $invoice->getFormattedSubtotal() }}</span>
-                                </div>
-                                @if($invoice->tax_amount > 0)
-                                    <div class="total-row">
-                                        <span class="total-label">Tax:</span>
-                                        <span class="total-value">{{ $invoice->getFormattedTaxAmount() }}</span>
-                                    </div>
-                                @endif
-                                <div class="total-row grand-total">
-                                    <span class="total-label">Total:</span>
-                                    <span class="total-value">{{ $invoice->getFormattedTotalAmount() }}</span>
-                                </div>
-                                @if($invoice->status !== 'paid')
-                                    <div class="total-row balance-due">
-                                        <span class="total-label">Balance Due:</span>
-                                        <span class="total-value">{{ $invoice->getFormattedTotalAmount() }}</span>
-                                    </div>
-                                @endif
+                            @if($invoice->customer->country)
+                                <div>{{ $invoice->customer->country }}</div>
+                            @endif
+                        </div>
+                        @if($invoice->customer->phone)
+                            <div class="contact-info">
+                                <div>{{ $invoice->customer->phone }}</div>
                             </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
-            <!-- Notes -->
-            @if($invoice->notes)
-                <div class="notes-section">
-                    <div class="notes-title">Notes</div>
-                    <div class="notes-content">{{ $invoice->notes }}</div>
+    <!-- Items Table -->
+    <div class="items-container">
+        <table class="items-table">
+            <thead>
+            <tr>
+                <th>Description</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Rate</th>
+                <th class="text-right">Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach($invoice->items as $item)
+                <tr>
+                    <td>{{ $item->description }}</td>
+                    <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
+                    <td class="text-right">{{ \App\Helpers\CurrencyHelper::format($item->unit_rate, $invoice->currency) }}</td>
+                    <td class="text-right font-medium">{{ \App\Helpers\CurrencyHelper::format($item->total_amount, $invoice->currency) }}</td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals-section">
+        <table class="totals-table">
+            <tr>
+                <td class="totals-spacer"></td>
+                <td class="totals-content">
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <table class="total-row-table">
+                                <tr>
+                                    <td class="total-label">Subtotal:</td>
+                                    <td class="total-value">{{ $invoice->getFormattedSubtotal() }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        @if($invoice->tax_amount > 0)
+                            <div class="total-row">
+                                <table class="total-row-table">
+                                    <tr>
+                                        <td class="total-label">Tax:</td>
+                                        <td class="total-value">{{ $invoice->getFormattedTaxAmount() }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        @endif
+                        <div class="total-row grand-total">
+                            <table class="total-row-table">
+                                <tr>
+                                    <td class="total-label">Total:</td>
+                                    <td class="total-value">{{ $invoice->getFormattedTotalAmount() }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        @if($invoice->status !== 'paid')
+                            <div class="total-row balance-due">
+                                <table class="total-row-table">
+                                    <tr>
+                                        <td class="total-label">Balance Due:</td>
+                                        <td class="total-value">{{ $invoice->getFormattedTotalAmount() }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Notes -->
+    @if($invoice->notes)
+        <div class="notes-section">
+            <div class="notes-title">Notes</div>
+            <div class="notes-content">{{ $invoice->notes }}</div>
+        </div>
+    @endif
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-content">
+            @if($companySettings->email || $companySettings->website)
+                <div>
+                    @if($companySettings->email){{ $companySettings->email }}@endif
+                    @if($companySettings->email && $companySettings->website) | @endif
+                    @if($companySettings->website){{ $companySettings->website }}@endif
                 </div>
             @endif
-
-            <!-- Footer -->
-            <div class="footer">
-                <div class="footer-content">
-                    @if($companySettings->email || $companySettings->website)
-                        <div>
-                            @if($companySettings->email){{ $companySettings->email }}@endif
-                            @if($companySettings->email && $companySettings->website) | @endif
-                            @if($companySettings->website){{ $companySettings->website }}@endif
-                        </div>
-                    @endif
-                    <div class="thank-you">Thank you for your business!</div>
-                </div>
-            </div>
+            <div class="thank-you">Thank you for your business!</div>
         </div>
+    </div>
+</div>
 </body>
-</html> 
+</html>
