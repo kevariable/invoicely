@@ -5,7 +5,8 @@ namespace Invoice\Invoice\Domain\Actions;
 use App\Models\CompanySetting;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\View;
-use Spatie\Browsershot\Browsershot;
+// use Spatie\Browsershot\Browsershot;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 final readonly class GenerateInvoiceAction
 {
@@ -15,20 +16,32 @@ final readonly class GenerateInvoiceAction
 
         $invoice->load(['customer', 'items']);
 
-        $html = View::make('invoice-pdf-tailwind', [
+        $html = View::make('invoice-pdf-dompdf', [
             'invoice' => $invoice,
             'companySettings' => $companySettings,
         ])->render();
 
-        return Browsershot::html($html)
-            ->fullPage()
-            ->setNodeBinary('/usr/bin/node')
-            ->setNpmBinary('/usr/bin/npm')
-            ->setChromePath('/usr/bin/chromium-headless-shell')
-            ->noSandbox()
-            ->format('A4')
-            ->margins(15, 15, 15, 15)
-            ->showBackground()
-            ->pdf();
+        // Commented out Spatie Browsershot implementation
+        // return Browsershot::html($html)
+        //     ->fullPage()
+        //     ->setNodeBinary('/usr/bin/node')
+        //     ->setNpmBinary('/usr/bin/npm')
+        //     ->setChromePath('/usr/bin/chromium-headless-shell')
+        //     ->noSandbox()
+        //     ->format('A4')
+        //     ->margins(15, 15, 15, 15)
+        //     ->showBackground()
+        //     ->pdf();
+
+        // New DomPDF implementation
+        return Pdf::loadHTML($html)
+            ->setPaper('A4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'Arial',
+                'chroot' => public_path(),
+            ])
+            ->output();
     }
 }

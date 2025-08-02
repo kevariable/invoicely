@@ -78,18 +78,15 @@
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">From</h3>
                         <div class="text-gray-900">
-                            <div class="font-semibold text-lg">{{ $companySettings->company_name }}</div>
-                            @if($companySettings->address)
-                                <div class="mt-2 text-sm text-gray-600 space-y-1">
-                                    <div>{{ $companySettings->address }}</div>
-                                    <div>
-                                        {{ $companySettings->city }}@if($companySettings->city && $companySettings->state), @endif{{ $companySettings->state }} {{ $companySettings->zip_code }}
-                                    </div>
-                                    @if($companySettings->country)
-                                        <div>{{ $companySettings->country }}</div>
-                                    @endif
+                            <div class="mt-2 text-sm text-gray-600 space-y-1">
+                                <div>{{ $companySettings->address }}</div>
+                                <div>
+                                    {{ $companySettings->city }}@if($companySettings->city && $companySettings->state), @endif{{ $companySettings->state }} {{ $companySettings->zip_code }}
                                 </div>
-                            @endif
+                                @if($companySettings->country)
+                                    <div>{{ $companySettings->country }}</div>
+                                @endif
+                            </div>
                             @if($companySettings->phone || $companySettings->email)
                                 <div class="mt-3 text-sm text-gray-600 space-y-1">
                                     @if($companySettings->phone)
