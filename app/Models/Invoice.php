@@ -40,6 +40,21 @@ class Invoice extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Calculate amounts when invoice is created
+        static::creating(function ($invoice) {
+            $invoice->calculateAmounts();
+        });
+
+        // Calculate amounts when invoice is updated
+        static::updating(function ($invoice) {
+            $invoice->calculateAmounts();
+        });
+    }
+
     /**
      * Get the customer that owns the invoice.
      */
@@ -88,6 +103,40 @@ class Invoice extends Model
     }
 
     /**
+     * Calculate subtotal from invoice items.
+     */
+    public function calculateSubtotal(): float
+    {
+        return $this->items()->sum('total_amount');
+    }
+
+    /**
+     * Calculate total amount (subtotal + tax).
+     */
+    public function calculateTotalAmount(): float
+    {
+        return $this->calculateSubtotal() + $this->tax_amount;
+    }
+
+    /**
+     * Calculate and update all amounts.
+     */
+    public function calculateAmounts(): void
+    {
+        $this->subtotal = $this->calculateSubtotal();
+        $this->total_amount = $this->calculateTotalAmount();
+    }
+
+    /**
+     * Update amounts after items are modified.
+     */
+    public function updateAmounts(): void
+    {
+        $this->calculateAmounts();
+        $this->save();
+    }
+
+    /**
      * Generate next invoice number.
      */
     public static function generateInvoiceNumber(): string
@@ -95,7 +144,7 @@ class Invoice extends Model
         $lastInvoice = static::orderBy('id', 'desc')->first();
         $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
 
-        return 'INV-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        return 'BH-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 
     /**

@@ -77,18 +77,32 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->prefixIcon('heroicon-o-currency-dollar')
                             ->disabled()
-                            ->dehydrated(),
+                            ->dehydrated()
+                            ->default(0)
+                            ->afterStateHydrated(function ($state, $record) {
+                                if ($record) {
+                                    return $record->calculateSubtotal();
+                                }
+                                return 0;
+                            }),
 
                         Forms\Components\TextInput::make('tax_amount')
                             ->numeric()
                             ->prefixIcon('heroicon-o-currency-dollar')
-                            ->default(0),
+                            ->default(0)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $subtotal = $get('subtotal') ?? 0;
+                                $taxAmount = $state ?? 0;
+                                $set('total_amount', $subtotal + $taxAmount);
+                            }),
 
                         Forms\Components\TextInput::make('total_amount')
                             ->numeric()
                             ->prefixIcon('heroicon-o-currency-dollar')
                             ->disabled()
-                            ->dehydrated(),
+                            ->dehydrated()
+                            ->default(0),
                     ])->columns(4),
 
                 Forms\Components\Textarea::make('notes')

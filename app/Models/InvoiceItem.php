@@ -23,6 +23,26 @@ class InvoiceItem extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Update invoice amounts when item is created
+        static::created(function ($item) {
+            $item->invoice->updateAmounts();
+        });
+
+        // Update invoice amounts when item is updated
+        static::updated(function ($item) {
+            $item->invoice->updateAmounts();
+        });
+
+        // Update invoice amounts when item is deleted
+        static::deleted(function ($item) {
+            $item->invoice->updateAmounts();
+        });
+    }
+
     /**
      * Get the invoice that owns the item.
      */
