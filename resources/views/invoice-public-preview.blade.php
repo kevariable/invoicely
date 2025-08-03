@@ -15,21 +15,14 @@
     <!-- Header Actions -->
     <div class="no-print bg-white shadow-sm border-b sticky top-0 z-10">
         <div class="max-w-4xl mx-auto px-4 py-3">
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 class="text-lg font-semibold text-gray-900">Invoice Preview</h1>
                     <p class="text-sm text-gray-600">{{ $invoice->invoice_number }}</p>
                 </div>
-                <div class="flex space-x-3">
-                    <button onclick="window.print()"
-                            class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                        </svg>
-                        Print
-                    </button>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
                     <a href="{{ route('invoice.public.download', $invoice->public_token) }}"
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
+                       class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -41,14 +34,14 @@
     </div>
 
     <!-- Invoice Content -->
-    <div class="max-w-4xl mx-auto p-6">
+    <div class="max-w-4xl mx-auto p-4 sm:p-6">
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-            <div class="p-8">
+            <div class="p-4 sm:p-8">
                 <!-- Header -->
-                <div class="flex justify-between items-start mb-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2">INVOICE</h1>
-                        <div class="flex items-center space-x-2">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">INVOICE</h1>
+                        <div class="flex flex-wrap items-center gap-2">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                 {{ $invoice->status === 'paid' ? 'bg-green-100 text-green-800' : 
                                    ($invoice->status === 'overdue' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
@@ -61,8 +54,8 @@
                             @endif
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="text-2xl font-bold text-gray-900">{{ $invoice->invoice_number }}</div>
+                    <div class="text-left sm:text-right">
+                        <div class="text-xl sm:text-2xl font-bold text-gray-900">{{ $invoice->invoice_number }}</div>
                         <div class="text-sm text-gray-600 mt-1">
                             Issue Date: {{ $invoice->issue_date->format('M j, Y') }}
                         </div>
@@ -73,13 +66,16 @@
                 </div>
 
                 <!-- From/To Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
                     <!-- From -->
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">From</h3>
                         <div class="text-gray-900">
-                            <div class="mt-2 text-sm text-gray-600 space-y-1">
-                                <div>{{ $companySettings->address }}</div>
+                            <div class="font-semibold text-base mb-2">{{ $companySettings->person_name }}</div>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                @if($companySettings->address)
+                                    <div>{{ $companySettings->address }}</div>
+                                @endif
                                 <div>
                                     {{ $companySettings->city }}@if($companySettings->city && $companySettings->state), @endif{{ $companySettings->state }} {{ $companySettings->zip_code }}
                                 </div>
@@ -104,9 +100,11 @@
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Bill To</h3>
                         <div class="text-gray-900">
-                            <div class="mt-2 text-sm text-gray-600 space-y-1">
-                                <div>{{ $invoice->customer->name }}</div>
-                                <div>{{ $invoice->customer->address }}</div>
+                            <div class="font-semibold text-base mb-2">{{ $invoice->customer->name }}</div>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                @if($invoice->customer->address)
+                                    <div>{{ $invoice->customer->address }}</div>
+                                @endif
                                 <div>
                                     {{ $invoice->customer->city }}@if($invoice->customer->city && $invoice->customer->state), @endif{{ $invoice->customer->state }} {{ $invoice->customer->zip_code }}
                                 </div>
@@ -121,8 +119,15 @@
                     </div>
                 </div>
 
-                <!-- Items Table -->
-                <div class="mb-8">
+                <!-- Items Section Header -->
+                <div class="lg:hidden mb-6">
+                    <div class="bg-gray-100 text-gray-700 font-semibold text-sm uppercase tracking-wide px-4 py-3 rounded-lg text-center">
+                        Items
+                    </div>
+                </div>
+
+                <!-- Items Table - Desktop -->
+                <div class="hidden lg:block mb-8">
                     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
                         <table class="min-w-full divide-y divide-gray-300">
                             <thead class="bg-gray-50">
@@ -163,10 +168,35 @@
                     </div>
                 </div>
 
+                <!-- Items Table - Mobile -->
+                <div class="lg:hidden mb-8">
+                    @foreach($invoice->items as $item)
+                        <div class="border border-gray-200 rounded-lg p-5 mb-4 bg-white shadow-sm">
+                            <div class="font-semibold text-gray-900 text-base mb-4 pb-3 border-b border-gray-100">
+                                {{ $item->description }}
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity</span>
+                                    <span class="text-sm font-medium text-gray-900 pt-1">{{ number_format($item->quantity, 2) }}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Rate/Unit</span>
+                                    <span class="text-sm font-medium text-gray-900 pt-1">{{ \App\Helpers\CurrencyHelper::format($item->unit_rate, $invoice->currency) }}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</span>
+                                    <span class="text-sm font-medium text-gray-900 pt-1">{{ \App\Helpers\CurrencyHelper::format($item->total_amount, $invoice->currency) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
                 <!-- Totals -->
                 <div class="flex justify-end">
-                    <div class="w-64">
-                        <div class="bg-gray-50 p-6 rounded-lg">
+                    <div class="w-full sm:w-64">
+                        <div class="bg-gray-50 p-4 sm:p-6 rounded-lg">
                             <div class="space-y-3">
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Subtotal:</span>
