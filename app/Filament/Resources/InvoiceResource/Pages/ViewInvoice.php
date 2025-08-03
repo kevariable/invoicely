@@ -61,16 +61,7 @@ class ViewInvoice extends ViewRecord
                 ->label('Download PDF')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('primary')
-                ->action(function () {
-                    $pdfService = new GenerateInvoiceAction;
-                    $pdfContent = $pdfService->execute($this->record);
-
-                    $filename = 'invoice-'.$this->record->invoice_number.'.pdf';
-
-                    return response($pdfContent)
-                        ->header('Content-Type', 'application/pdf')
-                        ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
-                }),
+                ->url(fn () => route('invoice.public.download', $this->record->public_token)),
 
             Actions\Action::make('mark_paid')
                 ->label('Mark as Paid')

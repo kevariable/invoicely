@@ -231,16 +231,7 @@ class InvoiceResource extends Resource
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('primary')
-                    ->action(function (Invoice $record) {
-                        $pdfService = new GenerateInvoiceAction;
-                        $pdfContent = $pdfService->execute($record);
-
-                        $filename = 'invoice-'.$record->invoice_number.'.pdf';
-
-                        return response($pdfContent)
-                            ->header('Content-Type', 'application/pdf')
-                            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
-                    }),
+                    ->url(fn (Invoice $record) => route('invoice.public.download', $record->public_token)),
 
                 Tables\Actions\EditAction::make(),
 
