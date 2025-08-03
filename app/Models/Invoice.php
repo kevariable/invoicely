@@ -144,7 +144,7 @@ class Invoice extends Model
         $lastInvoice = static::orderBy('id', 'desc')->first();
         $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
 
-        return 'BH-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        return CompanySetting::getSettings()->invoice_prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 
     /**

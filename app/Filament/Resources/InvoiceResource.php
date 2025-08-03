@@ -106,6 +106,7 @@ class InvoiceResource extends Resource
                     ])->columns(4),
 
                 Forms\Components\Textarea::make('notes')
+                    ->default(fn () => CompanySetting::getSettings()->bank_details)
                     ->columnSpanFull(),
             ]);
     }

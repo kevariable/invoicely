@@ -28,6 +28,11 @@ class CompanySettingResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Company Information')
                     ->schema([
+                        Forms\Components\TextInput::make('invoice_prefix')
+                            ->label('Invoice Prefix')
+                            ->maxLength(255)
+                            ->helperText('This prefix will be used to generate invoice numbers'),
+
                         Forms\Components\TextInput::make('company_name')
                             ->label('Company Name')
                             ->maxLength(255)

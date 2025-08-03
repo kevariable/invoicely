@@ -21,6 +21,7 @@ class CompanySetting extends Model
         'bank_details',
         'currency',
         'tax_rate',
+        'invoice_prefix',
     ];
 
     protected $casts = [
@@ -40,6 +41,7 @@ class CompanySetting extends Model
             'country' => 'United States',
             'currency' => 'USD',
             'tax_rate' => 0,
+            'invoice_prefix' => 'INV-',
         ]);
     }
 
