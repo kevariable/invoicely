@@ -9,7 +9,6 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Mail;
-use Invoice\Invoice\Domain\Actions\GenerateInvoiceAction;
 
 /**
  * @property \App\Models\Invoice $record

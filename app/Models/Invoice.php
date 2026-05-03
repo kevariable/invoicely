@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'invoice_number',
         'customer_id',
@@ -15,9 +18,11 @@ class Invoice extends Model
         'view_state',
         'public_token',
         'viewed_at',
+        'email_sent_at',
         'subtotal',
         'tax_amount',
         'total_amount',
+        'capped_total_amount',
         'currency',
         'issue_date',
         'due_date',
@@ -32,10 +37,12 @@ class Invoice extends Model
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'capped_total_amount' => 'decimal:2',
         'issue_date' => 'date',
         'due_date' => 'date',
         'paid_date' => 'datetime',
         'viewed_at' => 'datetime',
+        'email_sent_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -111,11 +118,17 @@ class Invoice extends Model
     }
 
     /**
-     * Calculate total amount (subtotal + tax).
+     * Calculate total amount (subtotal + tax), respecting an optional cap.
      */
     public function calculateTotalAmount(): float
     {
-        return $this->calculateSubtotal() + $this->tax_amount;
+        $computed = $this->calculateSubtotal() + (float) $this->tax_amount;
+
+        if ($this->capped_total_amount !== null) {
+            return (float) $this->capped_total_amount;
+        }
+
+        return $computed;
     }
 
     /**
@@ -125,6 +138,33 @@ class Invoice extends Model
     {
         $this->subtotal = $this->calculateSubtotal();
         $this->total_amount = $this->calculateTotalAmount();
+    }
+
+    /**
+     * Whether a manual cap is overriding the computed total.
+     */
+    public function isCapped(): bool
+    {
+        return $this->capped_total_amount !== null;
+    }
+
+    /**
+     * Negative delta applied by the cap (0 when no cap is set).
+     */
+    public function getCapAdjustment(): float
+    {
+        if (! $this->isCapped()) {
+            return 0.0;
+        }
+
+        $computed = (float) $this->subtotal + (float) $this->tax_amount;
+
+        return (float) $this->capped_total_amount - $computed;
+    }
+
+    public function getFormattedCapAdjustment(): string
+    {
+        return $this->getFormattedAmount($this->getCapAdjustment());
     }
 
     /**
@@ -144,7 +184,7 @@ class Invoice extends Model
         $lastInvoice = static::orderBy('id', 'desc')->first();
         $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
 
-        return CompanySetting::getSettings()->invoice_prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        return CompanySetting::getSettings()->invoice_prefix.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 
     /**

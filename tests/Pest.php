@@ -15,6 +15,10 @@ pest()->extend(Tests\TestCase::class)
  // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
 
+uses()->beforeEach(function () {
+    $this->markTestSkipped('Volt auth scaffolding has been replaced by the Filament admin panel.');
+})->in('Feature/Auth', 'Feature/Settings');
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

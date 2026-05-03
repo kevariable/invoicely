@@ -523,6 +523,16 @@
                                 </table>
                             </div>
                         @endif
+                        @if($invoice->isCapped())
+                            <div class="total-row">
+                                <table class="total-row-table">
+                                    <tr>
+                                        <td class="total-label">Adjustment:</td>
+                                        <td class="total-value">{{ $invoice->getFormattedCapAdjustment() }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        @endif
                         <div class="total-row grand-total">
                             <table class="total-row-table">
                                 <tr>

@@ -13,8 +13,8 @@ Route::get('/invoice/preview/{token}/download', [App\Http\Controllers\InvoicePre
     ->name('invoice.public.download');
 
 // Redirect any old routes to admin
-//Route::redirect('/dashboard', '/admin');
-//Route::redirect('/settings', '/admin');
-//Route::redirect('/settings/{any}', '/admin')->where('any', '.*');
+// Route::redirect('/dashboard', '/admin');
+// Route::redirect('/settings', '/admin');
+// Route::redirect('/settings/{any}', '/admin')->where('any', '.*');
 
-//require __DIR__.'/auth.php';
+// require __DIR__.'/auth.php';

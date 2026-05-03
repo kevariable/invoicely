@@ -16,7 +16,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
-use Invoice\Invoice\Domain\Actions\GenerateInvoiceAction;
 
 class InvoiceResource extends Resource
 {
@@ -83,6 +82,7 @@ class InvoiceResource extends Resource
                                 if ($record) {
                                     return $record->calculateSubtotal();
                                 }
+
                                 return 0;
                             }),
 
@@ -90,11 +90,11 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->prefixIcon('heroicon-o-currency-dollar')
                             ->default(0)
-                            ->reactive()
+                            ->live(debounce: 500)
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                $subtotal = $get('subtotal') ?? 0;
-                                $taxAmount = $state ?? 0;
-                                $set('total_amount', $subtotal + $taxAmount);
+                                $subtotal = (float) ($get('subtotal') ?? 0);
+                                $taxAmount = (float) ($state ?? 0);
+                                $set('total_amount', round($subtotal + $taxAmount, 2));
                             }),
 
                         Forms\Components\TextInput::make('total_amount')
@@ -103,6 +103,24 @@ class InvoiceResource extends Resource
                             ->disabled()
                             ->dehydrated()
                             ->default(0),
+
+                        Forms\Components\TextInput::make('capped_total_amount')
+                            ->label('Capped Total')
+                            ->helperText('Optional. Overrides the calculated total (e.g. CEO-imposed cap).')
+                            ->numeric()
+                            ->prefixIcon('heroicon-o-currency-dollar')
+                            ->live(debounce: 500)
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                if ($state === null || $state === '') {
+                                    $subtotal = (float) ($get('subtotal') ?? 0);
+                                    $tax = (float) ($get('tax_amount') ?? 0);
+                                    $set('total_amount', round($subtotal + $tax, 2));
+
+                                    return;
+                                }
+
+                                $set('total_amount', round((float) $state, 2));
+                            }),
                     ])->columns(4),
 
                 Forms\Components\Textarea::make('notes')
@@ -232,6 +250,12 @@ class InvoiceResource extends Resource
                         Mail::to($record->customer->email)->send(
                             new InvoiceNotification($record->load(['customer', 'items']), $companySettings)
                         );
+
+                        $updates = ['email_sent_at' => now()];
+                        if ($record->status === 'draft') {
+                            $updates['status'] = 'sent';
+                        }
+                        $record->update($updates);
                     })
                     ->after(function (Invoice $record) {
                         \Filament\Notifications\Notification::make()
@@ -240,7 +264,7 @@ class InvoiceResource extends Resource
                             ->success()
                             ->send();
                     })
-                    ->visible(fn (Invoice $record) => ! empty($record->customer->email)),
+                    ->visible(fn (Invoice $record) => ! empty($record->customer->email) && empty($record->email_sent_at)),
 
                 Tables\Actions\Action::make('download_pdf')
                     ->label('Download PDF')

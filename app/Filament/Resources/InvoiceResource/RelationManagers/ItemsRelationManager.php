@@ -29,12 +29,11 @@ class ItemsRelationManager extends RelationManager
                     ->step(0.01)
                     ->minValue(0)
                     ->placeholder('e.g., 8.5 (hours), 10 (pieces), etc.')
-                    ->reactive()
+                    ->live(debounce: 500)
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        $rate = $get('unit_rate');
-                        if ($state && $rate) {
-                            $set('total_amount', round($state * $rate, 2));
-                        }
+                        $rate = (float) ($get('unit_rate') ?? 0);
+                        $qty = (float) ($state ?? 0);
+                        $set('total_amount', round($qty * $rate, 2));
                     }),
 
                 Forms\Components\TextInput::make('unit_rate')
@@ -45,12 +44,11 @@ class ItemsRelationManager extends RelationManager
                     ->minValue(0)
                     ->prefixIcon('heroicon-o-currency-dollar')
                     ->placeholder('Rate per unit/hour/piece')
-                    ->reactive()
+                    ->live(debounce: 500)
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        $quantity = $get('quantity');
-                        if ($state && $quantity) {
-                            $set('total_amount', round($state * $quantity, 2));
-                        }
+                        $quantity = (float) ($get('quantity') ?? 0);
+                        $rate = (float) ($state ?? 0);
+                        $set('total_amount', round($quantity * $rate, 2));
                     }),
 
                 Forms\Components\TextInput::make('total_amount')
