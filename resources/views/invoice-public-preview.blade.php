@@ -208,6 +208,12 @@
                                         <span class="text-gray-900">{{ $invoice->getFormattedTaxAmount() }}</span>
                                     </div>
                                 @endif
+                                @if($invoice->isCapped())
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Adjustment:</span>
+                                        <span class="text-gray-900">{{ $invoice->getFormattedCapAdjustment() }}</span>
+                                    </div>
+                                @endif
                                 <div class="border-t border-gray-200 pt-3">
                                     <div class="flex justify-between text-lg font-bold">
                                         <span class="text-gray-900">Total:</span>

@@ -23,8 +23,9 @@ class InvoicePreviewController extends Controller
             abort(404, 'Invoice not found or link has expired.');
         }
 
-        // Mark invoice as viewed if it's currently unread
-        $invoice->markAsViewed();
+        if (auth()->guest()) {
+            $invoice->markAsViewed();
+        }
 
         $companySettings = CompanySetting::getSettings();
 
@@ -47,8 +48,9 @@ class InvoicePreviewController extends Controller
             abort(404, 'Invoice not found or link has expired.');
         }
 
-        // Mark invoice as viewed if it's currently unread
-        $invoice->markAsViewed();
+        if (auth()->guest()) {
+            $invoice->markAsViewed();
+        }
 
         $pdfService = new GenerateInvoiceAction;
         $pdfContent = $pdfService->execute($invoice);

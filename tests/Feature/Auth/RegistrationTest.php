@@ -1,7 +1,5 @@
 <?php
 
-use Livewire\Volt\Volt;
-
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('registration screen can be rendered', function () {
