@@ -30,18 +30,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @page { size: A4; margin: 0; }
+        @page { size: A4; margin: 14mm 12mm; }
         html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .avoid-break { page-break-inside: avoid; break-inside: avoid; }
+        thead { display: table-header-group; }
+        tr { page-break-inside: avoid; break-inside: avoid; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-900 antialiased">
-    <div class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
-        <article class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/70">
+<body class="bg-white font-sans text-slate-900 antialiased">
+    <div class="w-full">
+        <article>
 
             {{-- Brand bar --}}
-            <div class="h-2 w-full bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700"></div>
+            <div class="mb-7 h-1.5 w-full rounded-full bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700"></div>
 
-            <div class="px-6 py-8 sm:px-10 sm:py-10">
+            <div>
 
                 {{-- Header --}}
                 <header class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -83,10 +86,10 @@
                     </dl>
                 </header>
 
-                <div class="my-8 h-px bg-slate-200"></div>
+                <div class="my-6 h-px bg-slate-200"></div>
 
                 {{-- From / Bill To --}}
-                <section class="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                <section class="grid grid-cols-1 gap-8 sm:grid-cols-2 avoid-break">
                     <div>
                         <h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">From</h2>
                         <p class="mt-3 text-base font-semibold text-slate-900">{{ $companySettings->person_name }}</p>
@@ -134,25 +137,25 @@
                 </section>
 
                 {{-- Items: table on >=sm, card list on <sm --}}
-                <section class="mt-10">
+                <section class="mt-8">
                     {{-- Desktop / PDF table --}}
                     <div class="hidden overflow-hidden rounded-xl ring-1 ring-slate-200 sm:block">
                         <table class="min-w-full divide-y divide-slate-200">
                             <thead class="bg-slate-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Description</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Qty</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Rate</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Amount</th>
+                                    <th scope="col" class="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Description</th>
+                                    <th scope="col" class="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Qty</th>
+                                    <th scope="col" class="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Rate</th>
+                                    <th scope="col" class="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Amount</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 bg-white">
                                 @foreach($invoice->items as $item)
                                     <tr>
-                                        <td class="whitespace-pre-line px-6 py-4 text-sm text-slate-900">{{ $item->description }}</td>
-                                        <td class="px-6 py-4 text-right text-sm tabular-nums text-slate-700">{{ number_format($item->quantity, 2) }}</td>
-                                        <td class="px-6 py-4 text-right text-sm tabular-nums text-slate-700">{{ \App\Helpers\CurrencyHelper::format($item->unit_rate, $invoice->currency) }}</td>
-                                        <td class="px-6 py-4 text-right text-sm font-semibold tabular-nums text-slate-900">{{ \App\Helpers\CurrencyHelper::format($item->total_amount, $invoice->currency) }}</td>
+                                        <td class="whitespace-pre-line px-5 py-3 text-sm text-slate-900">{{ $item->description }}</td>
+                                        <td class="px-5 py-3 text-right text-sm tabular-nums text-slate-700">{{ number_format($item->quantity, 2) }}</td>
+                                        <td class="px-5 py-3 text-right text-sm tabular-nums text-slate-700">{{ \App\Helpers\CurrencyHelper::format($item->unit_rate, $invoice->currency) }}</td>
+                                        <td class="px-5 py-3 text-right text-sm font-semibold tabular-nums text-slate-900">{{ \App\Helpers\CurrencyHelper::format($item->total_amount, $invoice->currency) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -184,8 +187,8 @@
                 </section>
 
                 {{-- Totals --}}
-                <section class="mt-8 flex justify-end">
-                    <div class="w-full rounded-xl bg-slate-50 p-6 ring-1 ring-slate-200 sm:w-80">
+                <section class="mt-6 flex justify-end avoid-break">
+                    <div class="w-full rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 sm:w-80">
                         <dl class="space-y-3 text-sm">
                             <div class="flex items-center justify-between">
                                 <dt class="text-slate-600">Subtotal</dt>
@@ -213,14 +216,14 @@
 
                 {{-- Notes --}}
                 @if($invoice->notes)
-                    <section class="mt-10 border-t border-slate-200 pt-6">
+                    <section class="mt-8 border-t border-slate-200 pt-5 avoid-break">
                         <h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Notes</h2>
                         <p class="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{{ $invoice->notes }}</p>
                     </section>
                 @endif
 
                 {{-- Footer --}}
-                <footer class="mt-10 border-t border-slate-200 pt-6 text-center">
+                <footer class="mt-8 border-t border-slate-200 pt-5 text-center avoid-break">
                     @if($companySettings->email || $companySettings->website)
                         <p class="text-sm text-slate-600">
                             @if($companySettings->email)<span class="break-all">{{ $companySettings->email }}</span>@endif
