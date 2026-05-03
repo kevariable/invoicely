@@ -116,6 +116,7 @@ class ItemsRelationManager extends RelationManager
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->reorderable('sort')
+            ->defaultSort('sort');
     }
 }

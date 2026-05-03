@@ -16,12 +16,14 @@ class InvoiceItem extends Model
         'quantity',
         'unit_rate',
         'total_amount',
+        'sort',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:2',
         'unit_rate' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'sort' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -29,6 +31,12 @@ class InvoiceItem extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($item) {
+            if (empty($item->sort)) {
+                $item->sort = (static::where('invoice_id', $item->invoice_id)->max('sort') ?? 0) + 1;
+            }
+        });
 
         // Update invoice amounts when item is created
         static::created(function ($item) {
