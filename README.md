@@ -44,9 +44,8 @@ A self-hosted invoicing and expense-tracking app for freelancers. Built on Larav
 | Backend | Laravel 12, PHP 8.4 (Docker) / ^8.2 (composer constraint) |
 | Runtime | FrankenPHP + Laravel Octane (production), `php artisan serve` (dev) |
 | Admin UI | Filament 3 |
-| Auth scaffolding | Livewire/Volt + Flux (kept; auth flow currently routed through Filament's `->login()`) |
 | Frontend assets | Tailwind v4, Vite 7 |
-| PDF | Spatie Browsershot (Chromium headless) |
+| PDF | Spatie Browsershot (local Chromium) **or** Cloudflare Browser Rendering — selectable via `LARAVEL_PDF_DRIVER` |
 | DB | SQLite by default; Postgres also wired (Dockerfile installs `pdo_pgsql`) |
 | Tests | Pest 3 |
 | Style | Laravel Pint, see `pint.json` |
@@ -60,11 +59,8 @@ A self-hosted invoicing and expense-tracking app for freelancers. Built on Larav
 - PHP 8.2+ with `pdo_sqlite`, `intl`, `gd`, `mbstring` (Herd / Valet on macOS works out of the box).
 - Composer 2.
 - Node 22 + npm.
-- Chromium (Browsershot needs it). Docker image installs `chromium-headless-shell`; locally on macOS Browsershot can use system Chromium / Chrome.
-- A **Flux Pro license** (`livewire/flux` is a paid private package). Configure once globally:
-  ```bash
-  composer config --global http-basic.composer.fluxui.dev "$FLUX_USERNAME" "$FLUX_LICENSE_KEY"
-  ```
+- For the **Browsershot** PDF driver: a Chromium binary on the host. On macOS, Herd installs it; on Linux servers, install `chromium-headless-shell` (or `chromium-browser`) and run `npm install` in the project root so `node_modules/puppeteer` exists.
+- For the **Cloudflare** PDF driver: a Cloudflare account with Browser Rendering enabled, an API token with the `Browser Rendering: Edit` scope, and the account ID.
 
 ### Install
 
@@ -188,6 +184,13 @@ database/
 - Currency: extend `App\Helpers\CurrencyHelper::CURRENCIES`, not migrations.
 - Filament panel: single panel `admin`, top navigation, Neutral palette, brand logo from `resources/views/filament/brand-logo.blade.php` (currentColor = light/dark in one asset). Resources/Pages/Widgets are auto-discovered.
 - Authentication is gated through Filament's `->login()`. The User model implements `canAccessPanel()` against `config('app.can_access_panel')`, which reads `APP_CAN_ACCESS_PANEL` from env (comma-separated allowlist of emails).
+
+### PDF rendering
+
+`Invoice\Invoice\Domain\Actions\GenerateInvoiceAction` dispatches on `config('pdf.driver')` (env: `LARAVEL_PDF_DRIVER`):
+
+- **`browsershot`** (default) — renders locally via Spatie Browsershot. Needs a Chromium binary and `node_modules/puppeteer`. Best for dev and self-hosted servers where you control the runtime.
+- **`cloudflare`** — POSTs the rendered HTML to Cloudflare's Browser Rendering REST API and returns the resulting PDF. No local Chromium required, which makes it the right choice on serverless hosts. Set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in env.
 
 ---
 
