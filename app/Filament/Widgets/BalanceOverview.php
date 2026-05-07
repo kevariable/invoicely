@@ -15,30 +15,39 @@ class BalanceOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $currency = CompanySetting::getSettings()->currency ?? 'USD';
+        $invoiceCurrencies = Invoice::where('status', 'paid')->distinct()->pluck('currency');
+        $billCurrencies = Bill::where('status', 'paid')->distinct()->pluck('currency');
 
-        $income = (float) Invoice::where('status', 'paid')->sum('total_amount');
-        $expenses = (float) Bill::where('status', 'paid')->sum('amount');
-        $net = $income - $expenses;
+        $currencies = $invoiceCurrencies->merge($billCurrencies)->filter()->unique()->values();
+        if ($currencies->isEmpty()) {
+            $currencies = collect([CompanySetting::getSettings()->currency ?? 'USD']);
+        }
 
-        $netColor = $net >= 0 ? 'success' : 'danger';
-        $netIcon = $net >= 0 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down';
+        $stats = [];
+        foreach ($currencies as $currency) {
+            $income = (float) Invoice::where('status', 'paid')->where('currency', $currency)->sum('total_amount');
+            $expenses = (float) Bill::where('status', 'paid')->where('currency', $currency)->sum('amount');
+            $net = $income - $expenses;
 
-        return [
-            Stat::make('Income', CurrencyHelper::format($income, $currency))
+            $netColor = $net >= 0 ? 'success' : 'danger';
+            $netIcon = $net >= 0 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down';
+
+            $stats[] = Stat::make("Income ({$currency})", CurrencyHelper::format($income, $currency))
                 ->description('Paid invoices')
                 ->color('success')
-                ->icon('heroicon-o-banknotes'),
+                ->icon('heroicon-o-banknotes');
 
-            Stat::make('Expenses', CurrencyHelper::format($expenses, $currency))
+            $stats[] = Stat::make("Expenses ({$currency})", CurrencyHelper::format($expenses, $currency))
                 ->description('Paid bills')
                 ->color('warning')
-                ->icon('heroicon-o-credit-card'),
+                ->icon('heroicon-o-credit-card');
 
-            Stat::make('Net balance', CurrencyHelper::format($net, $currency))
+            $stats[] = Stat::make("Net balance ({$currency})", CurrencyHelper::format($net, $currency))
                 ->description('Income − Expenses')
                 ->color($netColor)
-                ->icon($netIcon),
-        ];
+                ->icon($netIcon);
+        }
+
+        return $stats;
     }
 }

@@ -10,12 +10,36 @@ class CurrencyHelper
             'name' => 'US Dollar',
             'symbol' => '$',
             'position' => 'before', // before or after the amount
+            'decimals' => 2,
+            'thousands_separator' => ',',
+            'decimal_separator' => '.',
         ],
         'GBP' => [
             'code' => 'GBP',
             'name' => 'British Pound',
             'symbol' => '£',
             'position' => 'before',
+            'decimals' => 2,
+            'thousands_separator' => ',',
+            'decimal_separator' => '.',
+        ],
+        'IDR' => [
+            'code' => 'IDR',
+            'name' => 'Indonesian Rupiah',
+            'symbol' => 'Rp',
+            'position' => 'before',
+            'decimals' => 0,
+            'thousands_separator' => '.',
+            'decimal_separator' => ',',
+        ],
+        'MYR' => [
+            'code' => 'MYR',
+            'name' => 'Malaysian Ringgit',
+            'symbol' => 'RM',
+            'position' => 'before',
+            'decimals' => 2,
+            'thousands_separator' => ',',
+            'decimal_separator' => '.',
         ],
     ];
 
@@ -51,10 +75,15 @@ class CurrencyHelper
     /**
      * Format amount with currency symbol.
      */
-    public static function format(float $amount, string $currencyCode, int $decimals = 2): string
+    public static function format(float $amount, string $currencyCode, ?int $decimals = null): string
     {
         $currency = self::CURRENCIES[$currencyCode] ?? self::CURRENCIES['USD'];
-        $formattedAmount = number_format($amount, $decimals);
+        $formattedAmount = number_format(
+            $amount,
+            $decimals ?? $currency['decimals'] ?? 2,
+            $currency['decimal_separator'] ?? '.',
+            $currency['thousands_separator'] ?? ',',
+        );
 
         if ($currency['position'] === 'before') {
             return $currency['symbol'].$formattedAmount;

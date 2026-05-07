@@ -15,41 +15,68 @@ class InvoiceStatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $currency = CompanySetting::getSettings()->currency ?? 'USD';
-
-        $totalEarned = (float) Invoice::where('status', 'paid')->sum('total_amount');
-        $outstanding = (float) Invoice::whereIn('status', ['sent', 'overdue'])->sum('total_amount');
-
-        $overdueQuery = Invoice::where('due_date', '<', now())->where('status', '!=', 'paid');
-        $overdueAmount = (float) (clone $overdueQuery)->sum('total_amount');
-        $overdueCount = (clone $overdueQuery)->count();
-
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
-        $thisMonth = (float) Invoice::where('status', 'paid')
-            ->whereBetween('paid_date', [$startOfMonth, $endOfMonth])
-            ->sum('total_amount');
 
-        return [
-            Stat::make('Total earned', CurrencyHelper::format($totalEarned, $currency))
+        $currencies = Invoice::query()
+            ->where(function ($q) {
+                $q->where('status', 'paid')
+                    ->orWhereIn('status', ['sent', 'overdue'])
+                    ->orWhere(function ($qq) {
+                        $qq->where('due_date', '<', now())->where('status', '!=', 'paid');
+                    });
+            })
+            ->distinct()
+            ->pluck('currency')
+            ->filter()
+            ->values();
+
+        if ($currencies->isEmpty()) {
+            $currencies = collect([CompanySetting::getSettings()->currency ?? 'USD']);
+        }
+
+        $stats = [];
+        foreach ($currencies as $currency) {
+            $totalEarned = (float) Invoice::where('status', 'paid')
+                ->where('currency', $currency)
+                ->sum('total_amount');
+
+            $outstanding = (float) Invoice::whereIn('status', ['sent', 'overdue'])
+                ->where('currency', $currency)
+                ->sum('total_amount');
+
+            $overdueQuery = Invoice::where('due_date', '<', now())
+                ->where('status', '!=', 'paid')
+                ->where('currency', $currency);
+            $overdueAmount = (float) (clone $overdueQuery)->sum('total_amount');
+            $overdueCount = (clone $overdueQuery)->count();
+
+            $thisMonth = (float) Invoice::where('status', 'paid')
+                ->where('currency', $currency)
+                ->whereBetween('paid_date', [$startOfMonth, $endOfMonth])
+                ->sum('total_amount');
+
+            $stats[] = Stat::make("Total earned ({$currency})", CurrencyHelper::format($totalEarned, $currency))
                 ->description('Paid invoices')
                 ->color('success')
-                ->icon('heroicon-o-banknotes'),
+                ->icon('heroicon-o-banknotes');
 
-            Stat::make('Outstanding', CurrencyHelper::format($outstanding, $currency))
+            $stats[] = Stat::make("Outstanding ({$currency})", CurrencyHelper::format($outstanding, $currency))
                 ->description('Sent + overdue')
                 ->color('warning')
-                ->icon('heroicon-o-clock'),
+                ->icon('heroicon-o-clock');
 
-            Stat::make('Overdue', CurrencyHelper::format($overdueAmount, $currency))
+            $stats[] = Stat::make("Overdue ({$currency})", CurrencyHelper::format($overdueAmount, $currency))
                 ->description($overdueCount.' '.($overdueCount === 1 ? 'invoice' : 'invoices'))
                 ->color('danger')
-                ->icon('heroicon-o-exclamation-triangle'),
+                ->icon('heroicon-o-exclamation-triangle');
 
-            Stat::make('Paid this month', CurrencyHelper::format($thisMonth, $currency))
+            $stats[] = Stat::make("Paid this month ({$currency})", CurrencyHelper::format($thisMonth, $currency))
                 ->description($startOfMonth->format('F Y'))
                 ->color('primary')
-                ->icon('heroicon-o-calendar'),
-        ];
+                ->icon('heroicon-o-calendar');
+        }
+
+        return $stats;
     }
 }
