@@ -177,6 +177,41 @@ class Invoice extends Model
     }
 
     /**
+     * Create a draft copy of this invoice, including its line items.
+     *
+     * The clone gets a fresh invoice number, reset dates and a clean
+     * share/view state. Amounts are recomputed from the copied items.
+     */
+    public function duplicate(): self
+    {
+        $copy = static::create([
+            'invoice_number' => static::generateInvoiceNumber(),
+            'customer_id' => $this->customer_id,
+            'status' => 'draft',
+            'tax_amount' => $this->tax_amount,
+            'capped_total_amount' => $this->capped_total_amount,
+            'currency' => $this->currency,
+            'issue_date' => now(),
+            'due_date' => now()->addDays(30),
+            'notes' => $this->notes,
+        ]);
+
+        foreach ($this->items as $item) {
+            $copy->items()->create([
+                'description' => $item->description,
+                'quantity' => $item->quantity,
+                'unit_rate' => $item->unit_rate,
+                'total_amount' => $item->total_amount,
+                'sort' => $item->sort,
+            ]);
+        }
+
+        $copy->updateAmounts();
+
+        return $copy;
+    }
+
+    /**
      * Generate next invoice number.
      */
     public static function generateInvoiceNumber(): string

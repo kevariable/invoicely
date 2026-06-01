@@ -274,6 +274,25 @@ class InvoiceResource extends Resource
 
                 Tables\Actions\EditAction::make(),
 
+                Tables\Actions\Action::make('duplicate')
+                    ->label('Duplicate')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->modalHeading('Duplicate Invoice')
+                    ->modalDescription(fn (Invoice $record) => 'Create a draft copy of invoice '.$record->invoice_number.'?')
+                    ->action(function (Invoice $record) {
+                        $copy = $record->duplicate();
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Invoice duplicated')
+                            ->body('Created draft '.$copy->invoice_number.'.')
+                            ->success()
+                            ->send();
+
+                        return redirect(Pages\EditInvoice::getUrl(['record' => $copy]));
+                    }),
+
                 Tables\Actions\Action::make('mark_paid')
                     ->label('Mark as Paid')
                     ->icon('heroicon-o-check-circle')
